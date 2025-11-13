@@ -18,11 +18,15 @@ A simple CLI tool to search for PDF books using DuckDuckGo and optionally downlo
 
 ### Run Online (Directly from GitHub)
 
+For suggestions:
 ```bash
-curl -s https://raw.githubusercontent.com/7not-nico/rubypdf-tools/master/pdf_searcher.rb | ruby -
+ruby <(curl -s https://raw.githubusercontent.com/7not-nico/rubypdf-tools/master/pdf_searcher.rb) programming 1
 ```
 
-Follow the prompts to select a category and book.
+For free query:
+```bash
+ruby <(curl -s https://raw.githubusercontent.com/7not-nico/rubypdf-tools/master/pdf_searcher.rb) "the roses"
+```
 
 ### Run Locally
 
@@ -39,11 +43,13 @@ Follow the prompts to select a category and book.
 
 3. Run the script:
    ```bash
-   ruby pdf_searcher.rb
-   # Or with download: ruby pdf_searcher.rb -d
+   ruby pdf_searcher.rb "free query"
+   # Or for suggestions: ruby pdf_searcher.rb programming 1
+   # Or interactive: ruby pdf_searcher.rb programming
+   # With download: add -d
    ```
 
-The script will prompt for a book category (programming, math, science, history), list academic book suggestions, let you choose one, and search for PDFs.
+The script accepts a free query or a category with optional choice number for academic book suggestions.
 
 ## Options
 
