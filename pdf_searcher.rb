@@ -154,8 +154,21 @@ begin
     puts "#{index + 1}. #{r[:title]}: #{r[:link]}"
   end
   if download
-    downloader = PDFDownloader.new(results)
-    downloader.download
+    if results.empty?
+      puts "No PDFs found to download."
+    elsif results.size == 1
+      downloader = PDFDownloader.new([results[0]])
+      downloader.download
+    else
+      puts "Enter the number to download (1-#{results.size}):"
+      num = STDIN.gets.chomp.to_i - 1
+      if num >= 0 && num < results.size
+        downloader = PDFDownloader.new([results[num]])
+        downloader.download
+      else
+        puts "Invalid number."
+      end
+    end
   end
 rescue => e
   puts "Error: #{e.message}"
