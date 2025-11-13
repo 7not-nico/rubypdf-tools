@@ -29,7 +29,7 @@ class PDFSearcher
         end
       end
       { title: title, link: real_link }
-    end.reject { |r| r[:title].nil? || r[:link].nil? || !r[:link].end_with?('.pdf') }
+    end.reject { |r| r[:title].nil? || r[:link].nil? || !r[:link].end_with?('.pdf') }.first(10)
     results
   end
 end
@@ -150,8 +150,8 @@ end
 begin
   searcher = PDFSearcher.new(query)
   results = searcher.search
-  results.each do |r|
-    puts "#{r[:title]}: #{r[:link]}"
+  results.each_with_index do |r, index|
+    puts "#{index + 1}. #{r[:title]}: #{r[:link]}"
   end
   if download
     downloader = PDFDownloader.new(results)
