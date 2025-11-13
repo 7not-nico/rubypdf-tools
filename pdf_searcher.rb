@@ -5,6 +5,7 @@ require 'optparse'
 require 'open-uri'
 require 'nokogiri'
 require 'fileutils'
+require 'benchmark'
 
 class PDFSearcher
   def initialize(query)
@@ -149,7 +150,11 @@ end
 
 begin
   searcher = PDFSearcher.new(query)
-  results = searcher.search
+  results = nil
+  time = Benchmark.measure do
+    results = searcher.search
+  end
+  puts "Search took #{time.real.round(2)} seconds"
   results.each_with_index do |r, index|
     puts "#{index + 1}. #{r[:title]}: #{r[:link]}"
   end
