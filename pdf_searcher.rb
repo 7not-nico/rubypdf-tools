@@ -111,43 +111,41 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-category = ARGV.shift
-choice_num = ARGV.shift&.to_i
+category_or_query = ARGV.join(' ')
 
-if category.nil?
-  puts "Usage: ruby pdf_searcher.rb CATEGORY [CHOICE] [-d]"
+if category_or_query.empty?
+  puts "Usage: ruby pdf_searcher.rb QUERY [-d]"
+  puts "Or for suggestions: ruby pdf_searcher.rb CATEGORY [CHOICE] [-d]"
   puts "Categories: #{BOOKS.keys.join(', ')}"
-  puts "If CHOICE is omitted, interactive mode is used."
   exit 1
 end
 
-category = category.downcase
-unless BOOKS.key?(category)
-  puts "Invalid category. Available: #{BOOKS.keys.join(', ')}"
-  exit 1
-end
-
-if choice_num.nil?
-  puts "Suggested academic books in #{category}:"
-  BOOKS[category].each_with_index do |book, index|
-    puts "#{index + 1}. #{book}"
+category = category_or_query.downcase
+if BOOKS.key?(category)
+  choice_num = ARGV[1]&.to_i
+  if choice_num.nil?
+    puts "Suggested academic books in #{category}:"
+    BOOKS[category].each_with_index do |book, index|
+      puts "#{index + 1}. #{book}"
+    end
+    puts "Choose a book by number:"
+    choice_input = STDIN.gets.chomp.to_i - 1
+    if choice_input < 0 || choice_input >= BOOKS[category].size
+      puts "Invalid choice."
+      exit 1
+    end
+    choice = choice_input
+  else
+    choice = choice_num - 1
+    if choice < 0 || choice >= BOOKS[category].size
+      puts "Invalid choice number."
+      exit 1
+    end
   end
-  puts "Choose a book by number:"
-  choice_input = STDIN.gets.chomp.to_i - 1
-  if choice_input < 0 || choice_input >= BOOKS[category].size
-    puts "Invalid choice."
-    exit 1
-  end
-  choice = choice_input
+  query = BOOKS[category][choice]
 else
-  choice = choice_num - 1
-  if choice < 0 || choice >= BOOKS[category].size
-    puts "Invalid choice number."
-    exit 1
-  end
+  query = category_or_query
 end
-
-query = BOOKS[category][choice]
 
 begin
   searcher = PDFSearcher.new(query)
