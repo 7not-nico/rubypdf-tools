@@ -132,7 +132,7 @@ if choice_num.nil?
     puts "#{index + 1}. #{book}"
   end
   puts "Choose a book by number:"
-  choice_input = gets.chomp.to_i - 1
+  choice_input = STDIN.gets.chomp.to_i - 1
   if choice_input < 0 || choice_input >= BOOKS[category].size
     puts "Invalid choice."
     exit 1
