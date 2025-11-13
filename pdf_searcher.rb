@@ -6,32 +6,34 @@ require 'open-uri'
 require 'nokogiri'
 require 'fileutils'
 require 'benchmark'
+require 'net/http'
+require 'json'
 
 class PDFSearcher
+  # Set your Google Custom Search API key and search engine ID here
+  API_KEY = ENV['GOOGLE_API_KEY'] || 'YOUR_API_KEY_HERE'
+  SEARCH_ENGINE_ID = ENV['GOOGLE_SEARCH_ENGINE_ID'] || 'YOUR_SEARCH_ENGINE_ID_HERE'
+
   def initialize(query)
     @query = query
   end
 
   def search
-    search_url = "https://duckduckgo.com/html/?q=#{URI.encode_www_form_component(@query)}+ext:pdf"
-    doc = Nokogiri::HTML(URI.open(search_url, 'User-Agent' => 'Mozilla/5.0 (compatible; PDFSearcher/1.0)'))
-    results = doc.css('.result').map do |result|
-      title = result.at_css('h2.result__title a.result__a')&.text
-      link_href = result.at_css('h2.result__title a.result__a')&.[]('href')
-      real_link = nil
-      if link_href
-        uri = URI.parse(link_href)
-        query_params = URI.decode_www_form(uri.query || '')
-        uddg_param = query_params.find { |k, v| k == 'uddg' }&.last
-        if uddg_param
-          real_link = URI.decode_www_form_component(uddg_param)
-        else
-          real_link = link_href
-        end
-      end
-      { title: title, link: real_link }
-    end.reject { |r| r[:title].nil? || r[:link].nil? || !r[:link].end_with?('.pdf') }.first(10)
-    results
+    return [] if API_KEY == 'YOUR_API_KEY_HERE' || SEARCH_ENGINE_ID == 'YOUR_SEARCH_ENGINE_ID_HERE'
+
+    url = "https://www.googleapis.com/customsearch/v1?key=#{API_KEY}&cx=#{SEARCH_ENGINE_ID}&q=#{URI.encode_www_form_component(@query)}+filetype:pdf&num=10"
+    uri = URI(url)
+    response = Net::HTTP.get(uri)
+    data = JSON.parse(response)
+    results = data['items']&.map do |item|
+      title = item['title']
+      link = item['link']
+      { title: title, link: link }
+    end || []
+    results.reject { |r| r[:link].nil? || !r[:link].end_with?('.pdf') }.first(10)
+  rescue => e
+    puts "Search error: #{e.message}"
+    []
   end
 end
 
