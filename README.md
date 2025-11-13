@@ -53,7 +53,7 @@ The script accepts a free query or a category with optional choice number for ac
 
 ## Options
 
-- `-d`, `--download`: Download found PDFs to `downloads/` directory
+- `-d`, `--download`: Download selected PDFs to `downloads/` directory (prompts for number if multiple)
 - `-h`, `--help`: Show help
 
 ## Categories and Books
