@@ -100,7 +100,7 @@ BOOKS = {
 # Main
 download = false
 OptionParser.new do |opts|
-  opts.banner = "Usage: pdf_searcher.rb [options]"
+  opts.banner = "Usage: pdf_searcher.rb CATEGORY [CHOICE] [options]\nCategories: #{BOOKS.keys.join(', ')}"
   opts.on("-d", "--download", "Download the found PDFs") do
     download = true
   end
@@ -110,22 +110,40 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-puts "What kind of book are you looking for? (#{BOOKS.keys.join(', ')})"
-category = gets.chomp.downcase
+category = ARGV.shift
+choice_num = ARGV.shift&.to_i
+
+if category.nil?
+  puts "Usage: ruby pdf_searcher.rb CATEGORY [CHOICE] [-d]"
+  puts "Categories: #{BOOKS.keys.join(', ')}"
+  puts "If CHOICE is omitted, interactive mode is used."
+  exit 1
+end
+
+category = category.downcase
 unless BOOKS.key?(category)
   puts "Invalid category. Available: #{BOOKS.keys.join(', ')}"
   exit 1
 end
 
-puts "Suggested academic books in #{category}:"
-BOOKS[category].each_with_index do |book, index|
-  puts "#{index + 1}. #{book}"
-end
-puts "Choose a book by number:"
-choice = gets.chomp.to_i - 1
-if choice < 0 || choice >= BOOKS[category].size
-  puts "Invalid choice."
-  exit 1
+if choice_num.nil?
+  puts "Suggested academic books in #{category}:"
+  BOOKS[category].each_with_index do |book, index|
+    puts "#{index + 1}. #{book}"
+  end
+  puts "Choose a book by number:"
+  choice_input = gets.chomp.to_i - 1
+  if choice_input < 0 || choice_input >= BOOKS[category].size
+    puts "Invalid choice."
+    exit 1
+  end
+  choice = choice_input
+else
+  choice = choice_num - 1
+  if choice < 0 || choice >= BOOKS[category].size
+    puts "Invalid choice number."
+    exit 1
+  end
 end
 
 query = BOOKS[category][choice]
