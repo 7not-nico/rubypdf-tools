@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# Updated for online use with args
 
 require 'optparse'
 require 'open-uri'
