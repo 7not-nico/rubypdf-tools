@@ -13,22 +13,20 @@ A simple CLI tool to search for PDF books using DuckDuckGo and optionally downlo
 
 - Ruby
 - Nokogiri gem (`gem install nokogiri`)
-- Google Custom Search API key and search engine ID (see Setup)
+- Bing Search API key (see Setup)
 
 ## Setup
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a new project or select existing.
-3. Enable the Custom Search JSON API.
-4. Create credentials (API key).
-5. Create a Custom Search Engine at [cse.google.com](https://cse.google.com).
-6. Get the search engine ID.
-7. Set environment variables:
+1. Go to [Azure Portal](https://portal.azure.com).
+2. Create a free account if needed.
+3. Search for "Bing Search v7" in Marketplace.
+4. Create a resource, select free tier (1000 queries/month).
+5. Go to "Keys and Endpoint" > Copy one of the keys.
+6. Set environment variable:
    ```bash
-   export GOOGLE_API_KEY='your_api_key'
-   export GOOGLE_SEARCH_ENGINE_ID='your_search_engine_id'
+   export BING_API_KEY='your_bing_api_key'
    ```
-   Or edit the script constants.
+   Or edit the script constant.
 
 ## Usage
 

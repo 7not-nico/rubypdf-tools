@@ -10,24 +10,27 @@ require 'net/http'
 require 'json'
 
 class PDFSearcher
-  # Set your Google Custom Search API key and search engine ID here
-  API_KEY = ENV['GOOGLE_API_KEY'] || 'YOUR_API_KEY_HERE'
-  SEARCH_ENGINE_ID = ENV['GOOGLE_SEARCH_ENGINE_ID'] || 'YOUR_SEARCH_ENGINE_ID_HERE'
+  # Set your Bing Search API key here
+  API_KEY = ENV['BING_API_KEY'] || 'YOUR_BING_API_KEY_HERE'
 
   def initialize(query)
     @query = query
   end
 
   def search
-    return [] if API_KEY == 'YOUR_API_KEY_HERE' || SEARCH_ENGINE_ID == 'YOUR_SEARCH_ENGINE_ID_HERE'
+    return [] if API_KEY == 'YOUR_BING_API_KEY_HERE'
 
-    url = "https://www.googleapis.com/customsearch/v1?key=#{API_KEY}&cx=#{SEARCH_ENGINE_ID}&q=#{URI.encode_www_form_component(@query)}+filetype:pdf&num=10"
+    url = "https://api.bing.microsoft.com/v7.0/search?q=#{URI.encode_www_form_component(@query)}+filetype:pdf&count=10"
     uri = URI(url)
-    response = Net::HTTP.get(uri)
-    data = JSON.parse(response)
-    results = data['items']&.map do |item|
-      title = item['title']
-      link = item['link']
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    request = Net::HTTP::Get.new(uri)
+    request['Ocp-Apim-Subscription-Key'] = API_KEY
+    response = http.request(request)
+    data = JSON.parse(response.body)
+    results = data['webPages']['value']&.map do |item|
+      title = item['name']
+      link = item['url']
       { title: title, link: link }
     end || []
     results.reject { |r| r[:link].nil? || !r[:link].end_with?('.pdf') }.first(10)
