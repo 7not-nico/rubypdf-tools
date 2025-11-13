@@ -58,10 +58,12 @@ The script accepts a free query or a category with optional choice number for ac
 
 ## Categories and Books
 
-- **programming**: The C Programming Language, Clean Code, Code Complete, Introduction to Algorithms, Design Patterns
-- **math**: Calculus, Linear Algebra and Its Applications, Discrete Mathematics, Probability and Statistics, Real Analysis
-- **science**: Introduction to Quantum Mechanics, Biology, Chemistry: The Central Science, Physics for Scientists and Engineers, Earth Science
-- **history**: A History of the World, The Guns of August, Sapiens: A Brief History of Humankind, The Rise and Fall of the Roman Empire, World War II
+Prioritized by fundamentality (most fundamental first):
+
+- **programming**: Introduction to Algorithms, The C Programming Language, Clean Code, Code Complete, Design Patterns, Computer Systems: A Programmer's Perspective, Structure and Interpretation of Computer Programs, Programming Pearls, The Pragmatic Programmer, Head First Design Patterns
+- **math**: Calculus, Linear Algebra and Its Applications, Discrete Mathematics and Its Applications, Probability and Statistics for Engineers, Real Analysis, Abstract Algebra, Differential Equations, Topology, Number Theory, Complex Analysis
+- **science**: Biology, Chemistry: The Central Science, Physics for Scientists and Engineers, Introduction to Quantum Mechanics, Earth Science, Genetics: From Genes to Genomes, Organic Chemistry, Thermodynamics, Evolutionary Biology, Astronomy
+- **history**: A History of the World, Sapiens: A Brief History of Humankind, The Guns of August, The Rise and Fall of the Roman Empire, World War II, The History of the Ancient World, Guns, Germs, and Steel, The Silk Roads, The Wright Brothers, The Cold War
 
 ## License
 
