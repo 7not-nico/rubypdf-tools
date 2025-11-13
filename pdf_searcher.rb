@@ -65,10 +65,42 @@ class PDFDownloader
   end
 end
 
+# Academic book suggestions
+BOOKS = {
+  "programming" => [
+    "The C Programming Language",
+    "Clean Code",
+    "Code Complete",
+    "Introduction to Algorithms",
+    "Design Patterns"
+  ],
+  "math" => [
+    "Calculus",
+    "Linear Algebra and Its Applications",
+    "Discrete Mathematics",
+    "Probability and Statistics",
+    "Real Analysis"
+  ],
+  "science" => [
+    "Introduction to Quantum Mechanics",
+    "Biology",
+    "Chemistry: The Central Science",
+    "Physics for Scientists and Engineers",
+    "Earth Science"
+  ],
+  "history" => [
+    "A History of the World",
+    "The Guns of August",
+    "Sapiens: A Brief History of Humankind",
+    "The Rise and Fall of the Roman Empire",
+    "World War II"
+  ]
+}
+
 # Main
 download = false
 OptionParser.new do |opts|
-  opts.banner = "Usage: pdf_searcher.rb [options] QUERY"
+  opts.banner = "Usage: pdf_searcher.rb [options]"
   opts.on("-d", "--download", "Download the found PDFs") do
     download = true
   end
@@ -78,11 +110,25 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-query = ARGV.join(' ')
-if query.empty?
-  puts "Please provide a search query."
+puts "What kind of book are you looking for? (#{BOOKS.keys.join(', ')})"
+category = gets.chomp.downcase
+unless BOOKS.key?(category)
+  puts "Invalid category. Available: #{BOOKS.keys.join(', ')}"
   exit 1
 end
+
+puts "Suggested academic books in #{category}:"
+BOOKS[category].each_with_index do |book, index|
+  puts "#{index + 1}. #{book}"
+end
+puts "Choose a book by number:"
+choice = gets.chomp.to_i - 1
+if choice < 0 || choice >= BOOKS[category].size
+  puts "Invalid choice."
+  exit 1
+end
+
+query = BOOKS[category][choice]
 
 begin
   searcher = PDFSearcher.new(query)
