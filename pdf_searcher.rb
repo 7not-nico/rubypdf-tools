@@ -29,7 +29,7 @@ class PDFSearcher
         end
       end
       { title: title, link: real_link }
-    end.reject { |r| r[:title].nil? || r[:link].nil? }
+    end.reject { |r| r[:title].nil? || r[:link].nil? || !r[:link].end_with?('.pdf') }
     results
   end
 end
