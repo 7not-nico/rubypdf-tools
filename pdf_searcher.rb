@@ -1,11 +1,48 @@
 #!/usr/bin/env ruby
-# Simplified for book suggestions only - 2025-11-13
+# Ruby PDF searcher with web search - 2025-11-13
 
 require 'optparse'
 require 'open-uri'
 require 'nokogiri'
 require 'fileutils'
 require 'benchmark'
+
+class PDFSearcher
+  USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+  ]
+
+  def initialize(query)
+    @query = query
+  end
+
+  def search
+    search_url = "https://search.brave.com/search?q=#{URI.encode_www_form_component(@query)}"
+    ua = USER_AGENTS.sample
+    headers = {
+      'User-Agent' => ua,
+      'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language' => 'en-US,en;q=0.5',
+      'Accept-Encoding' => 'gzip, deflate',
+      'Connection' => 'keep-alive',
+      'Upgrade-Insecure-Requests' => '1',
+      'Referer' => 'https://search.brave.com/',
+    }
+    doc = Nokogiri::HTML(URI.open(search_url, headers))
+    results = doc.css('a[class*="heading-serpresult"]').map do |a|
+      link = a['href']
+      title = a.text.strip
+      if link&.end_with?('.pdf') && !title.empty?
+        { title: title, link: link }
+      end
+    end.compact.first(10)
+  rescue => e
+    puts "Search error: #{e.message}"
+    []
+  end
+end
 
 
 
@@ -96,7 +133,7 @@ BOOKS = {
 # Main
 download = false
 OptionParser.new do |opts|
-  opts.banner = "Usage: pdf_searcher.rb CATEGORY [CHOICE] [options]\nCategories: #{BOOKS.keys.join(', ')}"
+  opts.banner = "Usage: pdf_searcher.rb QUERY [options]"
   opts.on("-d", "--download", "Download the found PDFs") do
     download = true
   end
@@ -106,42 +143,40 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-category = ARGV[0]&.downcase
-choice_num = ARGV[1]&.to_i
+query = ARGV.join(' ')
 
-if category.nil? || !BOOKS.key?(category)
-  puts "Usage: ruby pdf_searcher.rb CATEGORY [CHOICE] [-d]"
-  puts "Categories: #{BOOKS.keys.join(', ')}"
+if query.empty?
+  puts "Usage: ruby pdf_searcher.rb QUERY [-d]"
   exit 1
 end
 
-if choice_num.nil?
-  puts "Suggested academic books in #{category}:"
-  BOOKS[category].each_with_index do |book, index|
-    puts "#{index + 1}. #{book}"
-  end
-  puts "Choose a book by number:"
-  choice_input = STDIN.gets.chomp.to_i - 1
-  if choice_input < 0 || choice_input >= BOOKS[category].size
-    puts "Invalid choice."
-    exit 1
-  end
-  choice = choice_input
-else
-  choice = choice_num - 1
-  if choice < 0 || choice >= BOOKS[category].size
-    puts "Invalid choice number."
-    exit 1
-  end
+searcher = PDFSearcher.new(query)
+results = nil
+time = Benchmark.measure do
+  results = searcher.search
+end
+puts "Search took #{time.real.round(2)} seconds"
+if results.empty?
+  puts "No PDFs found."
+  exit
 end
 
-book_title = BOOKS[category][choice]
-puts "Selected: #{book_title}"
+results.each_with_index do |r, index|
+  puts "#{index + 1}. #{r[:title]}: #{r[:link]}"
+end
 
 if download
-  # Assume the book title is the query for download, but since no search, perhaps search manually or something.
-  # For KISS, just say to search manually.
-  puts "To download, search for '#{book_title} pdf' in your browser and download the PDF."
-else
-  puts "To find PDFs, search for '#{book_title} pdf' in your browser."
+  if results.size == 1
+    downloader = PDFDownloader.new([results[0]])
+    downloader.download
+  else
+    puts "Enter the number to download (1-#{results.size}):"
+    num = STDIN.gets.chomp.to_i - 1
+    if num >= 0 && num < results.size
+      downloader = PDFDownloader.new([results[num]])
+      downloader.download
+    else
+      puts "Invalid number."
+    end
+  end
 end

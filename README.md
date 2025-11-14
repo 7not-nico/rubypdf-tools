@@ -1,28 +1,16 @@
 # PDF Searcher
 
-A simple tool to search for PDFs online and download them. Available in Ruby (with book suggestions) and Go (direct search).
+A simple Ruby script to search for PDFs online and download them.
 
-## Ruby Version
+## Usage
 
-Run the Ruby script with a category for book suggestions:
-
-```bash
-ruby pdf_searcher.rb math
-```
-
-It lists books, choose one, use `-d` for download instructions.
-
-Categories: programming, math, science, history
-
-## Go Version
-
-Run the Go program with any query to search for PDFs:
+Run the script with a query:
 
 ```bash
-go run pdf_searcher.go "calculus pdf"
+ruby pdf_searcher.rb "calculus pdf"
 ```
 
-It lists found PDFs, enter a number to download one.
+It searches Brave for PDFs, lists results, use `-d` to download selected one.
 
 ## Feedback
 
