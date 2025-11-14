@@ -20,20 +20,11 @@ class PDFSearcher
 
   def search
     search_url = "https://search.brave.com/search?q=#{URI.encode_www_form_component(@query)}"
-    ua = USER_AGENTS.sample
-    headers = {
-      'User-Agent' => ua,
-      'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language' => 'en-US,en;q=0.5',
-      'Accept-Encoding' => 'gzip, deflate',
-      'Connection' => 'keep-alive',
-      'Upgrade-Insecure-Requests' => '1',
-      'Referer' => 'https://search.brave.com/',
-    }
-    doc = Nokogiri::HTML(URI.open(search_url, headers))
-    results = doc.css('a[class*="heading-serpresult"]').map do |a|
+    doc = Nokogiri::HTML(URI.open(search_url))
+    results = doc.css('a').map do |a|
       link = a['href']
-      title = a.text.strip
+      title_elem = a.css('.title').first
+      title = title_elem ? title_elem['title'] : a.text.strip
       if link&.end_with?('.pdf') && !title.empty?
         { title: title, link: link }
       end
@@ -170,13 +161,8 @@ if download
     downloader = PDFDownloader.new([results[0]])
     downloader.download
   else
-    puts "Enter the number to download (1-#{results.size}):"
-    num = STDIN.gets.chomp.to_i - 1
-    if num >= 0 && num < results.size
-      downloader = PDFDownloader.new([results[num]])
-      downloader.download
-    else
-      puts "Invalid number."
-    end
+    puts "Downloading the first result: #{results[0][:title]}"
+    downloader = PDFDownloader.new([results[0]])
+    downloader.download
   end
 end
