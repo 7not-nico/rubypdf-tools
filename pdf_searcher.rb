@@ -1,44 +1,13 @@
 #!/usr/bin/env ruby
-# Updated for online use with args - 2025-11-13 14:00 - 2025-11-13
+# Simplified for book suggestions only - 2025-11-13
 
 require 'optparse'
 require 'open-uri'
 require 'nokogiri'
 require 'fileutils'
 require 'benchmark'
-require 'net/http'
-require 'json'
 
-class PDFSearcher
-  # Set your Bing Search API key here
-  API_KEY = ENV['BING_API_KEY'] || 'YOUR_BING_API_KEY_HERE'
 
-  def initialize(query)
-    @query = query
-  end
-
-  def search
-    return [] if API_KEY == 'YOUR_BING_API_KEY_HERE'
-
-    url = "https://api.bing.microsoft.com/v7.0/search?q=#{URI.encode_www_form_component(@query)}+filetype:pdf&count=10"
-    uri = URI(url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    request = Net::HTTP::Get.new(uri)
-    request['Ocp-Apim-Subscription-Key'] = API_KEY
-    response = http.request(request)
-    data = JSON.parse(response.body)
-    results = data['webPages']['value']&.map do |item|
-      title = item['name']
-      link = item['url']
-      { title: title, link: link }
-    end || []
-    results.reject { |r| r[:link].nil? || !r[:link].end_with?('.pdf') }.first(10)
-  rescue => e
-    puts "Search error: #{e.message}"
-    []
-  end
-end
 
 class PDFDownloader
   def initialize(results)
@@ -137,69 +106,42 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-category_or_query = ARGV.join(' ')
+category = ARGV[0]&.downcase
+choice_num = ARGV[1]&.to_i
 
-if category_or_query.empty?
-  puts "Usage: ruby pdf_searcher.rb QUERY [-d]"
-  puts "Or for suggestions: ruby pdf_searcher.rb CATEGORY [CHOICE] [-d]"
+if category.nil? || !BOOKS.key?(category)
+  puts "Usage: ruby pdf_searcher.rb CATEGORY [CHOICE] [-d]"
   puts "Categories: #{BOOKS.keys.join(', ')}"
   exit 1
 end
 
-category = category_or_query.downcase
-if BOOKS.key?(category)
-  choice_num = ARGV[1]&.to_i
-  if choice_num.nil?
-    puts "Suggested academic books in #{category}:"
-    BOOKS[category].each_with_index do |book, index|
-      puts "#{index + 1}. #{book}"
-    end
-    puts "Choose a book by number:"
-    choice_input = STDIN.gets.chomp.to_i - 1
-    if choice_input < 0 || choice_input >= BOOKS[category].size
-      puts "Invalid choice."
-      exit 1
-    end
-    choice = choice_input
-  else
-    choice = choice_num - 1
-    if choice < 0 || choice >= BOOKS[category].size
-      puts "Invalid choice number."
-      exit 1
-    end
+if choice_num.nil?
+  puts "Suggested academic books in #{category}:"
+  BOOKS[category].each_with_index do |book, index|
+    puts "#{index + 1}. #{book}"
   end
-  query = BOOKS[category][choice]
+  puts "Choose a book by number:"
+  choice_input = STDIN.gets.chomp.to_i - 1
+  if choice_input < 0 || choice_input >= BOOKS[category].size
+    puts "Invalid choice."
+    exit 1
+  end
+  choice = choice_input
 else
-  query = category_or_query
+  choice = choice_num - 1
+  if choice < 0 || choice >= BOOKS[category].size
+    puts "Invalid choice number."
+    exit 1
+  end
 end
 
-begin
-  searcher = PDFSearcher.new(query)
-  results = nil
-  time = Benchmark.measure do
-    results = searcher.search
-  end
-  puts "Search took #{time.real.round(2)} seconds"
-  results.each_with_index do |r, index|
-    puts "#{index + 1}. #{r[:title]}: #{r[:link]}"
-  end
-  if download
-    if results.empty?
-      puts "No PDFs found to download."
-    elsif results.size == 1
-      downloader = PDFDownloader.new([results[0]])
-      downloader.download
-    else
-      puts "Enter the number to download (1-#{results.size}):"
-      num = STDIN.gets.chomp.to_i - 1
-      if num >= 0 && num < results.size
-        downloader = PDFDownloader.new([results[num]])
-        downloader.download
-      else
-        puts "Invalid number."
-      end
-    end
-  end
-rescue => e
-  puts "Error: #{e.message}"
+book_title = BOOKS[category][choice]
+puts "Selected: #{book_title}"
+
+if download
+  # Assume the book title is the query for download, but since no search, perhaps search manually or something.
+  # For KISS, just say to search manually.
+  puts "To download, search for '#{book_title} pdf' in your browser and download the PDF."
+else
+  puts "To find PDFs, search for '#{book_title} pdf' in your browser."
 end

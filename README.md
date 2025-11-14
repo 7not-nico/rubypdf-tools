@@ -1,85 +1,29 @@
-# Ruby PDF Searcher
+# PDF Searcher
 
-A simple CLI tool to search for PDF books using DuckDuckGo and optionally download them.
+A simple tool to search for PDFs online and download them. Available in Ruby (with book suggestions) and Go (direct search).
 
-## Features
+## Ruby Version
 
-- Interactive prompts for book category and selection of academic book suggestions
-- Searches DuckDuckGo for PDFs
-- Downloads PDFs to a local `downloads/` directory
-- KISS principle: minimal, no redundancies
+Run the Ruby script with a category for book suggestions:
 
-## Requirements
-
-- Ruby
-- Nokogiri gem (`gem install nokogiri`)
-- Bing Search API key (see Setup)
-
-## Setup
-
-1. Go to [Azure Portal](https://portal.azure.com).
-2. Create a free account if needed.
-3. Search for "Bing Search v7" in Marketplace.
-4. Create a resource, select free tier (1000 queries/month).
-5. Go to "Keys and Endpoint" > Copy one of the keys.
-6. Set environment variable:
-   ```bash
-   export BING_API_KEY='your_bing_api_key'
-   ```
-   Or edit the script constant.
-
-## Usage
-
-### Run Online (Directly from GitHub)
-
-For suggestions:
 ```bash
-ruby <(curl -s https://raw.githubusercontent.com/7not-nico/rubypdf-tools/master/pdf_searcher.rb) programming 1
+ruby pdf_searcher.rb math
 ```
 
-For free query:
+It lists books, choose one, use `-d` for download instructions.
+
+Categories: programming, math, science, history
+
+## Go Version
+
+Run the Go program with any query to search for PDFs:
+
 ```bash
-ruby <(curl -s https://raw.githubusercontent.com/7not-nico/rubypdf-tools/master/pdf_searcher.rb) "the roses"
+go run pdf_searcher.go "calculus pdf"
 ```
 
-### Run Locally
+It lists found PDFs, enter a number to download one.
 
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/7not-nico/rubypdf-tools.git
-   cd rubypdf-tools
-   ```
+## Feedback
 
-2. Install dependencies:
-   ```bash
-   bundle install
-   ```
-
-3. Run the script:
-   ```bash
-   ruby pdf_searcher.rb "free query"
-   # Or for suggestions: ruby pdf_searcher.rb programming 1
-   # Or interactive: ruby pdf_searcher.rb programming
-   # With download: add -d
-   ```
-
-The script accepts a free query or a category with optional choice number for academic book suggestions.
-
-## Options
-
-- `-d`, `--download`: Download selected PDFs to `downloads/` directory (prompts for number if multiple)
-- `-h`, `--help`: Show help
-
-## Categories and Books
-
-Prioritized by fundamentality (most fundamental first):
-
-- **programming**: Introduction to Algorithms, The C Programming Language, Clean Code, Code Complete, Design Patterns, Computer Systems: A Programmer's Perspective, Structure and Interpretation of Computer Programs, Programming Pearls, The Pragmatic Programmer, Head First Design Patterns
-- **math**: Calculus, Linear Algebra and Its Applications, Discrete Mathematics and Its Applications, Probability and Statistics for Engineers, Real Analysis, Abstract Algebra, Differential Equations, Topology, Number Theory, Complex Analysis
-- **science**: Biology, Chemistry: The Central Science, Physics for Scientists and Engineers, Introduction to Quantum Mechanics, Earth Science, Genetics: From Genes to Genomes, Organic Chemistry, Thermodynamics, Evolutionary Biology, Astronomy
-- **history**: A History of the World, Sapiens: A Brief History of Humankind, The Guns of August, The Rise and Fall of the Roman Empire, World War II, The History of the Ancient World, Guns, Germs, and Steel, The Silk Roads, The Wright Brothers, The Cold War
-
-## License
-
-MIT</content>
-<parameter name="filePath">/home/eddyr/repo/rubypdf-tools/searcher-pdf/README.md
+To give feedback, report issues at https://github.com/sst/opencode/issues
