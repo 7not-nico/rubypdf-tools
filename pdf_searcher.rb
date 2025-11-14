@@ -123,10 +123,14 @@ BOOKS = {
 
 # Main
 download = false
+num_to_download = 1
 OptionParser.new do |opts|
   opts.banner = "Usage: pdf_searcher.rb QUERY [options]"
   opts.on("-d", "--download", "Download the found PDFs") do
     download = true
+  end
+  opts.on("-n", "--number NUM", Integer, "Number of PDFs to download (default: 1)") do |n|
+    num_to_download = n
   end
   opts.on("-h", "--help", "Show this help") do
     puts opts
@@ -157,12 +161,8 @@ results.each_with_index do |r, index|
 end
 
 if download
-  if results.size == 1
-    downloader = PDFDownloader.new([results[0]])
-    downloader.download
-  else
-    puts "Downloading the first result: #{results[0][:title]}"
-    downloader = PDFDownloader.new([results[0]])
-    downloader.download
-  end
+  num = [num_to_download, results.size].min
+  puts "Downloading the first #{num} result(s):"
+  downloader = PDFDownloader.new(results.first(num))
+  downloader.download
 end
