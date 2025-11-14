@@ -40,6 +40,8 @@ end
 class PDFDownloader
   def initialize(results)
     @results = results
+    @cache_file = 'downloads/downloaded.txt'
+    @downloaded = load_cache
   end
 
   def download
@@ -48,6 +50,10 @@ class PDFDownloader
     @results.each do |r|
       next unless r[:link].end_with?('.pdf')
       filename = sanitize_filename(r[:title]) + '.pdf'
+      if @downloaded.include?(filename)
+        puts "Skipped (already downloaded): #{filename}"
+        next
+      end
       filepath = File.join(dir, filename)
       begin
         URI.open(r[:link].gsub(' ', '%20')) do |file|
@@ -56,10 +62,23 @@ class PDFDownloader
           end
         end
         puts "Downloaded: #{filepath}"
+        @downloaded << filename
+        save_cache
       rescue => e
         puts "Error downloading #{r[:link]}: #{e.message}"
       end
     end
+  end
+
+  private
+
+  def load_cache
+    return [] unless File.exist?(@cache_file)
+    File.readlines(@cache_file).map(&:chomp)
+  end
+
+  def save_cache
+    File.write(@cache_file, @downloaded.join("\n"))
   end
 
   private
